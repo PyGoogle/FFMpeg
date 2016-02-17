@@ -46,7 +46,8 @@ def get_info_and_download(download_url):
             download_url, download=False)
 
     # download the video
-    video_out = meta['title'].replace(' ','') + '.'+ meta['ext']
+    # remove non-alpha-numeric such as ' ', '(', etc.
+    video_out = ''.join(c for c in meta['title'] if c.isalnum()) + '.'+ meta['ext']
     cmd = ['youtube-dl', '-o', video_out, download_url]
     subprocess.call(cmd)
 
@@ -80,16 +81,3 @@ if __name__ == '__main__':
     meta = get_info_and_download(u)
 
 
-'''
-    print 'upload date : %s' %(meta['upload_date'])
-    print 'uploader    : %s' %(meta['uploader'])
-    print 'views       : %d' %(meta['view_count'])
-    print 'likes       : %d' %(meta['like_count'])
-    print 'dislikes    : %d' %(meta['dislike_count'])
-    print 'id          : %s' %(meta['id'])
-    print 'format      : %s' %(meta['format'])
-    print 'duration    : %s' %(meta['duration'])
-    print 'title       : %s' %(meta['title'])
-    print 'description : %s' %(meta['description'])
-
-'''
