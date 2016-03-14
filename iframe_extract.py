@@ -1,6 +1,12 @@
 '''
 iframe_extract.py - download video and ffmpeg i-frame extraction
+Usage: 
+(ex) python iframe_extract.py -u https://www.youtube.com/watch?v=dP15zlyra3c
+This code does two things:
+1. Download using youtube-dl
+2. Extract i-frames via ffmpeg
 '''
+
 from __future__ import unicode_literals
 import youtube_dl
 
@@ -8,11 +14,16 @@ import sys
 import os
 import subprocess
 import argparse
+import glob
 
+
+
+def iframe_extract(inFile):
+
+# extract i-frame using ffmpeg
 # ffmpeg -i inFile -f image2 -vf \
 #   "select='eq(pict_type,PICT_TYPE_I)'" -vsync vfr oString%03d.png
 
-def iframe_extract(inFile):
     # infile : video file name 
     #          (ex) 'FoxSnowDive-Yellowstone-BBCTwo.mp4'
     imgPrefix = inFile.split('.')[0]
@@ -36,8 +47,12 @@ def iframe_extract(inFile):
     mvcmd = 'mv ' + imgPrefix + '*.png ' + imgPrefix
     os.system(mvcmd)
 
-# Get video meta info and then download
+
+
 def get_info_and_download(download_url):
+
+    # Get video meta info and then download using youtube-dl
+
     ydl_opts = {}
 
     # get meta info from the video
@@ -47,16 +62,33 @@ def get_info_and_download(download_url):
 
     # download the video
     # remove non-alpha-numeric such as ' ', '(', etc.
-    video_out = ''.join(c for c in meta['title'] if c.isalnum()) + '.'+ meta['ext']
-    cmd = ['youtube-dl', '-o', video_out, download_url]
+    # video_out = ''.join(c for c in meta['title'] if c.isalnum()) + '.'+ meta['ext']
+    out = meta['title'].replace(' ','') 
+    extension = meta['ext']
+    video_out = out + '.' + extension
+    cmd = ['youtube-dl', '-k', '-o', video_out, download_url]
     subprocess.call(cmd)
 
-    # call iframe-extraction
+    # Sometimes output file has format code in name such as 'out.f248.webm'
+    # so, in this case, we want to rename it 'out.webm' 
+    glob_str = '*.' + extension
+    for f in glob.glob(glob_str):
+       if out in f:
+          if os.path.isfile(f):
+             video_out = f
+             break
+       
+    # call iframe-extraction : ffmpeg
     iframe_extract(video_out)
     return meta
 
-# Currently, only the url option is used
+
+
 def check_arg(args=None):
+
+# Command line options
+# Currently, only the url option is used
+
     parser = argparse.ArgumentParser(description='download video')
     parser.add_argument('-u', '--url',
                         help='download url',
@@ -79,5 +111,3 @@ Usage sample:
 if __name__ == '__main__':
     u,i,o = check_arg(sys.argv[1:])
     meta = get_info_and_download(u)
-
-
