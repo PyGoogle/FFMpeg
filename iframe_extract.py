@@ -2,6 +2,12 @@
 iframe_extract.py - download video and ffmpeg i-frame extraction
 Usage: 
 (ex) python iframe_extract.py -u https://www.youtube.com/watch?v=dP15zlyra3c
+
+Test Cases
+python iframe_extract.py -u https://www.youtube.com/watch?v=dP15zlyra3c
+python iframe_extract.py -u https://www.youtube.com/watch?v=usYC_Z36rHw
+python iframe_extract.py -u https://www.youtube.com/watch?v=I4L2XirSJw0
+
 This code does two things:
 1. Download using youtube-dl
 2. Extract i-frames via ffmpeg
@@ -34,6 +40,7 @@ def iframe_extract(inFile):
     ffmpeg = home + '/bin/ffmpeg'
 
     imgFilenames = imgPrefix + '%03d.png'
+  
     cmd = [ffmpeg,'-i', inFile,'-f', 'image2','-vf',
         "select='eq(pict_type,PICT_TYPE_I)'",'-vsync','vfr', imgFilenames]
     
@@ -57,16 +64,17 @@ def get_info_and_download(download_url):
 
     # get meta info from the video
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        meta = ydl.extract_info(
-            download_url, download=False)
+        meta = ydl.extract_info(download_url, download=False)
 
-    # download the video
-    # remove non-alpha-numeric such as ' ', '(', etc.
-    # video_out = ''.join(c for c in meta['title'] if c.isalnum()) + '.'+ meta['ext']
-    out = meta['title'].replace(' ','') 
+    # renaming the file 
+    sp = ['<','>',':','\"','/','|','?','*',' ']
+    # remove special characters from the file name
+    out = ''.join(c for c in meta['title'] if c not in sp) 
     extension = meta['ext']
     video_out = out + '.' + extension
     cmd = ['youtube-dl', '-k', '-o', video_out, download_url]
+
+    # download the video
     subprocess.call(cmd)
 
     # Sometimes output file has format code in name such as 'out.f248.webm'
