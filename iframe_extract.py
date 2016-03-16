@@ -7,6 +7,10 @@ Test Cases
 python iframe_extract.py -u https://www.youtube.com/watch?v=dP15zlyra3c
 python iframe_extract.py -u https://www.youtube.com/watch?v=usYC_Z36rHw
 python iframe_extract.py -u https://www.youtube.com/watch?v=I4L2XirSJw0
+python iframe_extract.py -u https://www.youtube.com/watch?v=2wCgpdeQWZA
+python iframe_extract.py -u https://www.youtube.com/watch?v=iyisAjHdhas
+python iframe_extract.py -u https://www.youtube.com/watch?v=GqV7KMjw9jY
+python iframe_extract.py -u https://www.youtube.com/watch?v=Yb2okDst0oc
 
 This code does two things:
 1. Download using youtube-dl
@@ -45,13 +49,16 @@ def iframe_extract(inFile):
         "select='eq(pict_type,PICT_TYPE_I)'",'-vsync','vfr', imgFilenames]
     
     # create iframes
+    print "creating iframes ...."
     subprocess.call(cmd)
 
     # Move the extracted iframes to a subfolder
     # imgPrefix is used as a subfolder name that stores iframe images
     cmd = 'mkdir -p ' + imgPrefix
     os.system(cmd)
+    print "make subdirectoy", cmd
     mvcmd = 'mv ' + imgPrefix + '*.png ' + imgPrefix
+    print "moving images to subdirectoy", mvcmd
     os.system(mvcmd)
 
 
@@ -67,9 +74,8 @@ def get_info_and_download(download_url):
         meta = ydl.extract_info(download_url, download=False)
 
     # renaming the file 
-    sp = ['<','>',':','\"','/','|','?','*',' ']
     # remove special characters from the file name
-    out = ''.join(c for c in meta['title'] if c not in sp) 
+    out = ''.join(c for c in meta['title'] if c.isalnum() or c =='-' or c =='_' ) 
     extension = meta['ext']
     video_out = out + '.' + extension
     cmd = ['youtube-dl', '-k', '-o', video_out, download_url]
