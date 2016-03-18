@@ -94,8 +94,10 @@ def get_info_and_download(download_url):
     # download the video
     subprocess.call(cmd)
 
-    # Sometimes output file has format code in name such as 'out.f248.webm'
-    # so, in this case, we want to rename it 'out.webm' 
+    # Sometimes output file has format code in name such as 'out.webm'
+    # So, when the best output format happens to be mp4, for example, 'out.webm.mp4' 
+    # which is the input file for iframe_extract(). But there is no 'out.webm.mp4' any more.
+    # The following will reset the input as the newly merged video output, 'out.webm.mp4' 
     found = False
     extension_list = ['mkv', 'mp4', 'webm']
     for e in extension_list:
