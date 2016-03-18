@@ -22,14 +22,18 @@ import subprocess
 import argparse
 import glob
 
-if sys.platform == "Windows":
+if sys.platform == "win32":
     FFMPEG_BIN = "ffmpeg.exe"
-    MOVE = "move"
-    MKDIR = "mkdir"
-else:
+    MOVE = "move "
+    MKDIR = "md "
+elif sys.platform == 'linux' or sys.platform == 'linux2':
     FFMPEG_BIN = "ffmpeg"
-    MOVE = "mv"
-    MKDIR = "md"
+    MOVE = "mv "
+    MKDIR = "mkdir "
+elif sys.platform == 'darwin':
+    FFMPEG_BIN = "ffmpeg"
+    MOVE = "mv "
+    MKDIR = "mkdir "
 
 
 def iframe_extract(inFile):
@@ -51,16 +55,16 @@ def iframe_extract(inFile):
         "select='eq(pict_type,PICT_TYPE_I)'",'-vsync','vfr', imgFilenames]
     
     # create iframes
-    print "creating iframes ...."
+    print("creating iframes ....")
     subprocess.call(cmd)
 
     # Move the extracted iframes to a subfolder
     # imgPrefix is used as a subfolder name that stores iframe images
-    cmd = 'mkdir -p ' + imgPrefix
+    cmd = MKDIR + '-p ' + imgPrefix
     os.system(cmd)
-    print "make subdirectoy", cmd
-    mvcmd = 'mv ' + imgPrefix + '*.png ' + imgPrefix
-    print "moving images to subdirectoy", mvcmd
+    print("make subdirectoy=%s" %cmd)
+    mvcmd = MOVE + imgPrefix + '*.png ' + imgPrefix
+    print("moving images to subdirectoy %s" %mvcmd)
     os.system(mvcmd)
 
 
